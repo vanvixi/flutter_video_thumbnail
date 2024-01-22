@@ -95,9 +95,9 @@ unlinked_spec.ds
 **/ios/Flutter/flutter_export_environment.sh
 **/ios/ServiceDefinitions.json
 **/ios/Runner/GeneratedPluginRegistrant.*
-ios/Podfile.bk
-ios/Podfile.lock.bk
-ios/Pods_bk
+darwin/Podfile.bk
+darwin/Podfile.lock.bk
+darwin/Pods_bk
 
 # Coverage
 coverage/
@@ -142,8 +142,8 @@ local.properties
 store_certificates/
 
 # Fastlane
-ios/fastlane/README.md
-ios/fastlane/report.xml
+darwin/fastlane/README.md
+darwin/fastlane/report.xml
 android/fastlane/README.md
 android/fastlane/report.xml
 
