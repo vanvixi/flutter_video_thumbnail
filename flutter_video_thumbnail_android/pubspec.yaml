@@ -1,0 +1,37 @@
+name: flutter_video_thumbnail_android
+description: Android implementation of the flutter_video_thumbnail plugin.
+repository: https://github:com/vanvixi/flutter_video_thumbnail/tree/main/flutter_video_thumbnail_android
+
+environment:
+  sdk: '>=3.2.3 <4.0.0'
+  flutter: '>=3.3.0'
+
+flutter:
+  plugin:
+    implements: flutter_video_thumbnail
+    platforms:
+      android:
+        dartPluginClass: AndroidVideoThumbnail
+        package: com.vanvixi.flutter_video_thumbnail_android
+        pluginClass: FlutterVideoThumbnailAndroidPlugin
+
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_video_thumbnail_platform_interface:
+    git:
+      url: https://github.com/vanvixi/flutter_video_thumbnail.git
+      path: flutter_video_thumbnail_platform_interface
+      ref: main
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+  pigeon: ^15.0.2
+
+topics:
+  - video
+  - video-thumbnail
+
