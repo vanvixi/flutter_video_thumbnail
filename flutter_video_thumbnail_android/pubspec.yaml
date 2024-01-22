@@ -1,6 +1,7 @@
 name: flutter_video_thumbnail_android
 description: Android implementation of the flutter_video_thumbnail plugin.
 repository: https://github:com/vanvixi/flutter_video_thumbnail/tree/main/flutter_video_thumbnail_android
+version: 0.0.1
 
 environment:
   sdk: '>=3.2.3 <4.0.0'
