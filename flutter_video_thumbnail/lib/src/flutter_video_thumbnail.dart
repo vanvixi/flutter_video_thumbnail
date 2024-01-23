@@ -4,8 +4,7 @@ import 'package:flutter_video_thumbnail_platform_interface/flutter_video_thumbna
 FlutterVideoThumbnailPlatform? _lastVideoThumbnailPlatform;
 
 FlutterVideoThumbnailPlatform get _videoThumbnailPlatform {
-  final FlutterVideoThumbnailPlatform currentInstance =
-      FlutterVideoThumbnailPlatform.instance;
+  final FlutterVideoThumbnailPlatform currentInstance = FlutterVideoThumbnailPlatform.instance;
   if (_lastVideoThumbnailPlatform != currentInstance) {
     _lastVideoThumbnailPlatform = currentInstance;
   }
@@ -17,7 +16,7 @@ class FlutterVideoThumbnail {
     _videoThumbnailPlatform.dispose();
   }
 
-  Future<Uint8List?> getThumbnailDataAsync({
+  Future<Uint8List?> getThumbnailData({
     required String videoPath,
     required int timeMs,
     int width = 0,
@@ -26,15 +25,18 @@ class FlutterVideoThumbnail {
     required ImageFormat thumbnailFormat,
     Map<String, String>? headers,
   }) async {
-    return await _videoThumbnailPlatform.getThumbnailDataAsync(
+    return await _videoThumbnailPlatform.getThumbnailData(
       videoPath: videoPath,
       timeMs: timeMs,
+      width: width,
+      height: height,
       quality: quality,
       thumbnailFormat: thumbnailFormat,
+      headers: headers,
     );
   }
 
-  void getThumbnailData({
+  void getThumbnailDataStream({
     required String videoPath,
     int? videoDurationMs,
     int width = 0,
@@ -45,15 +47,20 @@ class FlutterVideoThumbnail {
     Map<String, String>? headers,
     String? receiveId,
   }) {
-    _videoThumbnailPlatform.getThumbnailData(
+    _videoThumbnailPlatform.getThumbnailDataStream(
       videoPath: videoPath,
+      videoDurationMs: videoDurationMs,
+      width: width,
+      height: height,
       quantity: quantity,
       quality: quality,
       thumbnailFormat: thumbnailFormat,
+      headers: headers,
+      receiveId: receiveId,
     );
   }
 
-  Stream<VideoThumbnailEvent> videoThumbnailResponse() {
-    return _videoThumbnailPlatform.videoThumbnailEvents();
+  Stream<VideoThumbnailResponseEvent> videoThumbnailResponses() {
+    return _videoThumbnailPlatform.videoThumbnailResponses();
   }
 }
