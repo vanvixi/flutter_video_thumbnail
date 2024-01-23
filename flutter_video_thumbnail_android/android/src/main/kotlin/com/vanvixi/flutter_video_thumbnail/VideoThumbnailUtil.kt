@@ -9,10 +9,6 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream
 
-fun interface ThumbnailCallback {
-    fun result(byteArray: ByteArray)
-}
-
 private class VideoUtilException(message: String) : Exception(message)
 
 class VideoThumbnailUtil {
@@ -75,7 +71,7 @@ class VideoThumbnailUtil {
         quality: Int,
         quantity: Int,
         format: ImageFormat,
-        callback: ThumbnailCallback
+        responseCallback: (byteArray: ByteArray) -> Unit
     ) {
         try {
             val eachPart = (videoDuration ?: duration) / quantity
@@ -90,7 +86,7 @@ class VideoThumbnailUtil {
                     format,
                 ) ?: continue
 
-                callback.result(byteArray)
+                responseCallback(byteArray)
             }
         } catch (e: Throwable) {
             Thread.getDefaultUncaughtExceptionHandler()
