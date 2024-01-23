@@ -1,62 +1,173 @@
-import 'package:flutter/material.dart';
-import 'dart:async';
+import 'dart:io';
 
-import 'package:flutter/services.dart';
-import 'package:flutter_video_thumbnail_android/flutter_video_thumbnail_android.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_video_thumbnail_platform_interface/flutter_video_thumbnail_platform_interface.dart';
+import 'package:image_picker/image_picker.dart';
+
+FlutterVideoThumbnailPlatform? _cachedPlatform;
+
+FlutterVideoThumbnailPlatform get _videoThumbnailPlatform {
+  _cachedPlatform ??= FlutterVideoThumbnailPlatform.instance;
+  return _cachedPlatform!;
+}
 
 void main() {
-  runApp(const MyApp());
+  runApp(const MaterialApp(
+    title: 'Flutter Video Thumbnail Example',
+    home: VideoPickerScreen(),
+  ));
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+class VideoPickerScreen extends StatefulWidget {
+  const VideoPickerScreen({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<VideoPickerScreen> createState() => _VideoPickerScreenState();
 }
 
-class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
-  // final _flutterVideoThumbnailAndroidPlugin = FlutterVideoThumbnailAndroid();
+class _VideoPickerScreenState extends State<VideoPickerScreen> {
+  final ImagePicker _picker = ImagePicker();
 
-  @override
-  void initState() {
-    super.initState();
-    initPlatformState();
-  }
+  void _pickVideo() async {
+    final XFile? file = await _picker.pickVideo(source: ImageSource.gallery);
 
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    // We also handle the message potentially returning null.
-    try {
-      // platformVersion =
-      //     await _flutterVideoThumbnailAndroidPlugin.getPlatformVersion() ?? 'Unknown platform version';
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
-    }
+    if (file == null || !mounted) return;
 
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    // setState(() {
-    //   _platformVersion = platformVersion;
-    // });
+    Navigator.push(
+      context,
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) => VideoThumbnailScreen(file: File(file.path)),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Plugin example app'),
+    return Scaffold(
+      appBar: AppBar(title: const Text("Video Picker")),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text("Click on the button to select video"),
+            ElevatedButton(
+              onPressed: _pickVideo,
+              child: const Text("Pick Video From Gallery"),
+            ),
+          ],
         ),
-        body: Center(
-          child: Text('Running on: $_platformVersion\n'),
-        ),
+      ),
+    );
+  }
+}
+
+class VideoThumbnailScreen extends StatefulWidget {
+  const VideoThumbnailScreen({required this.file, super.key});
+
+  final File file;
+
+  @override
+  State<VideoThumbnailScreen> createState() => _VideoThumbnailScreenState();
+}
+
+class _VideoThumbnailScreenState extends State<VideoThumbnailScreen> {
+  static const receiveId = 'FlutterVideoThumbnailID';
+  final List<Uint8List> _thumbnailData = [];
+
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _videoThumbnailPlatform.getThumbnailDataStream(
+        videoPath: widget.file.path,
+        quantity: 24,
+        quality: 10,
+        thumbnailFormat: ImageFormat.WEBP_LOSSLESS,
+        receiveId: receiveId,
+      );
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _videoThumbnailPlatform.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Flutter Video Thumbnail")),
+      body: StreamBuilder<VideoThumbnailResponseEvent>(
+        stream: _videoThumbnailPlatform.videoThumbnailResponses(),
+        builder: (context, snapshot) {
+          final data = snapshot.data;
+
+          if (data == null) return const Center(child: CircularProgressIndicator());
+
+          if (data.thumbnailData == null || data.receiveId != receiveId) {
+            return const SizedBox.shrink();
+          }
+
+          _thumbnailData.add(data.thumbnailData!);
+
+          return GridView.builder(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+            itemBuilder: (context, index) {
+              try {
+                final thumbnail = _thumbnailData[index];
+
+                return InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (BuildContext context) => ThumbnailDetailScreen(
+                          index: index,
+                          data: thumbnail,
+                        ),
+                      ),
+                    );
+                  },
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Hero(
+                        tag: 'thumbnail + $index',
+                        child: Image.memory(thumbnail, height: 100),
+                      ),
+                    ),
+                  ),
+                );
+              } catch (e) {
+                return const SizedBox.shrink();
+              }
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+class ThumbnailDetailScreen extends StatelessWidget {
+  const ThumbnailDetailScreen({
+    required this.index,
+    required this.data,
+    super.key,
+  });
+
+  final int index;
+  final Uint8List data;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Thumbnail Detail")),
+      body: Hero(
+        tag: 'thumbnail + $index',
+        child: Center(child: Image.memory(data)),
       ),
     );
   }
