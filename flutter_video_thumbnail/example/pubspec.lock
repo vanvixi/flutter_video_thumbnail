@@ -148,7 +148,7 @@ packages:
     description:
       path: flutter_video_thumbnail_android
       ref: main
-      resolved-ref: fca96c84f13eed3905ba0bf1db7aeab2063dd632
+      resolved-ref: e0f1970f72fffcd153acf15f6deb9820373a1d30
       url: "https://github.com/vanvixi/flutter_video_thumbnail.git"
     source: git
     version: "0.0.1"
@@ -157,7 +157,7 @@ packages:
     description:
       path: flutter_video_thumbnail_platform_interface
       ref: main
-      resolved-ref: fca96c84f13eed3905ba0bf1db7aeab2063dd632
+      resolved-ref: e0f1970f72fffcd153acf15f6deb9820373a1d30
       url: "https://github.com/vanvixi/flutter_video_thumbnail.git"
     source: git
     version: "0.0.1"

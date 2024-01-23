@@ -65,18 +65,19 @@ class VideoThumbnailScreen extends StatefulWidget {
 }
 
 class _VideoThumbnailScreenState extends State<VideoThumbnailScreen> {
+  static const String receiveId = 'FlutterVideoThumbnailID';
   final FlutterVideoThumbnail _videoThumbnail = FlutterVideoThumbnail();
   final List<Uint8List> _thumbnailData = [];
 
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      _videoThumbnail.getThumbnailData(
+      _videoThumbnail.getThumbnailDataStream(
         videoPath: widget.file.path,
-        quantity: 25,
+        quantity: 24,
         quality: 10,
         thumbnailFormat: ImageFormat.WEBP_LOSSLESS,
-        receiveId: 'FlutterVideoThumbnailID',
+        receiveId: receiveId,
       );
     });
     super.initState();
@@ -92,16 +93,14 @@ class _VideoThumbnailScreenState extends State<VideoThumbnailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Flutter Video Thumbnail")),
-      body: StreamBuilder<VideoThumbnailEvent>(
-        stream: _videoThumbnail.videoThumbnailResponse(),
+      body: StreamBuilder<VideoThumbnailResponseEvent>(
+        stream: _videoThumbnail.videoThumbnailResponses(),
         builder: (context, snapshot) {
           final data = snapshot.data;
 
           if (data == null) return const Center(child: CircularProgressIndicator());
 
-          if (data.thumbnailData == null
-              // || data.receiveId != 'FlutterVideoThumbnailID'
-              ) {
+          if (data.thumbnailData == null || data.receiveId != receiveId) {
             return const SizedBox.shrink();
           }
 
