@@ -17,7 +17,7 @@ class AndroidVideoThumbnail extends FlutterVideoThumbnailPlatform {
   Future<void> dispose() => _api.dispose();
 
   @override
-  Future<Uint8List?> getThumbnailDataAsync({
+  Future<Uint8List?> getThumbnailData({
     required String videoPath,
     required int timeMs,
     int width = 0,
@@ -27,6 +27,7 @@ class AndroidVideoThumbnail extends FlutterVideoThumbnailPlatform {
     Map<String, String>? headers,
   }) async {
     assert(timeMs >= 0 && width >= 0 && height >= 0, "timeMs, width, height must be greater than 0");
+
     final msg = await _api.getThumbnailDataAsync(GetThumbnailDataMessage(
       videoPath: videoPath,
       timeMs: timeMs,
@@ -42,7 +43,7 @@ class AndroidVideoThumbnail extends FlutterVideoThumbnailPlatform {
   }
 
   @override
-  void getThumbnailData({
+  void getThumbnailDataStream({
     required String videoPath,
     int? videoDurationMs,
     int width = 0,
@@ -69,19 +70,19 @@ class AndroidVideoThumbnail extends FlutterVideoThumbnailPlatform {
   }
 
   @override
-  Stream<VideoThumbnailEvent> videoThumbnailEvents() {
+  Stream<VideoThumbnailResponseEvent> videoThumbnailResponses() {
     return _eventChannel.receiveBroadcastStream().map((event) {
       final Map<dynamic, dynamic> map = event as Map<dynamic, dynamic>;
       switch (map['event']) {
         case 'thumbnailDataResponse':
-          return VideoThumbnailEvent(
+          return VideoThumbnailResponseEvent(
             eventType: VideoThumbnailEventType.thumbnailDataResponse,
             thumbnailData: map['value'] as Uint8List,
             receiveId: map['receiveId'] as String?,
           );
 
         default:
-          return const VideoThumbnailEvent(eventType: VideoThumbnailEventType.unknown);
+          return const VideoThumbnailResponseEvent(eventType: VideoThumbnailEventType.unknown);
       }
     });
   }

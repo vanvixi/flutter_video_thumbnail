@@ -120,7 +120,7 @@ packages:
     description:
       path: flutter_video_thumbnail_platform_interface
       ref: main
-      resolved-ref: "6ac6a45afe209cb5e013aacfa83b4af2b85f8108"
+      resolved-ref: "17f2ffe0e13ac51c85e65fd04146e09f19a38d04"
       url: "https://github.com/vanvixi/flutter_video_thumbnail.git"
     source: git
     version: "0.0.1"
