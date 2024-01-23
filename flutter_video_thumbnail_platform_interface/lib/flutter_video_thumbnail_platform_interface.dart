@@ -26,7 +26,7 @@ abstract class FlutterVideoThumbnailPlatform extends PlatformInterface {
 
   Future<void> dispose() => throw UnimplementedError('dispose() has not been implemented.');
 
-  Future<Uint8List?> getThumbnailDataAsync({
+  Future<Uint8List?> getThumbnailData({
     required String videoPath,
     required int timeMs,
     int width = 0,
@@ -35,10 +35,10 @@ abstract class FlutterVideoThumbnailPlatform extends PlatformInterface {
     required ImageFormat thumbnailFormat,
     Map<String, String>? headers,
   }) {
-    throw UnimplementedError('getThumbnailDataAsync() has not been implemented.');
+    throw UnimplementedError('getThumbnailData() has not been implemented.');
   }
 
-  void getThumbnailData({
+  void getThumbnailDataStream({
     required String videoPath,
     int? videoDurationMs,
     int width = 0,
@@ -49,12 +49,12 @@ abstract class FlutterVideoThumbnailPlatform extends PlatformInterface {
     Map<String, String>? headers,
     String? receiveId,
   }) {
-    throw UnimplementedError('getThumbnailData() has not been implemented.');
+    throw UnimplementedError('getThumbnailDataStream() has not been implemented.');
   }
 
-  /// Returns a Stream of [VideoThumbnailEvent]s.
-  Stream<VideoThumbnailEvent> videoThumbnailEvents() {
-    throw UnimplementedError('videoThumbnailEvents() has not been implemented.');
+  /// Returns a Stream of [VideoThumbnailResponseEvent]s.
+  Stream<VideoThumbnailResponseEvent> videoThumbnailResponses() {
+    throw UnimplementedError('videoThumbnailResponses() has not been implemented.');
   }
 }
 
@@ -66,12 +66,12 @@ enum ImageFormat {
 }
 
 @immutable
-class VideoThumbnailEvent {
-  /// Creates an instance of [VideoThumbnailEvent].
+class VideoThumbnailResponseEvent {
+  /// Creates an instance of [VideoThumbnailResponseEvent].
   ///
   /// The [eventType] argument is required.
   ///
-  const VideoThumbnailEvent({
+  const VideoThumbnailResponseEvent({
     required this.eventType,
     this.thumbnailData,
     this.receiveId,
@@ -88,7 +88,7 @@ class VideoThumbnailEvent {
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        other is VideoThumbnailEvent &&
+        other is VideoThumbnailResponseEvent &&
             runtimeType == other.runtimeType &&
             eventType == other.eventType &&
             thumbnailData == other.thumbnailData &&
