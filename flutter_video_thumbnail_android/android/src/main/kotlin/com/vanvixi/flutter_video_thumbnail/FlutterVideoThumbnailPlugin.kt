@@ -5,15 +5,12 @@ import android.util.Log
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.EventChannel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 /** FlutterVideoThumbnailPlugin */
 class FlutterVideoThumbnailPlugin : FlutterPlugin, VideoThumbnailApi {
     private val kTAG = "FVideoThumbnailPlugin"
     private val eventChannelName = "vanvixi/flutter_video_thumbnail"
-    private val mainScope = CoroutineScope(Dispatchers.Main)
+    private var isDisposed: Boolean = false
     private var flutterState: FlutterState? = null
     private val videoThumbnailUtil = VideoThumbnailUtil()
 
@@ -37,10 +34,12 @@ class FlutterVideoThumbnailPlugin : FlutterPlugin, VideoThumbnailApi {
 
     override fun dispose() {
         videoThumbnailUtil.dispose()
+        isDisposed = true
         Log.d(kTAG, "FlutterVideoEditorPlugin disposed")
     }
 
     override fun getThumbnailDataAsync(msg: GetThumbnailDataMessage): ThumbnailMessage {
+        isDisposed = false
         val videoPath = msg.videoPath
         val format = ImageFormat.ofRaw(msg.formatIndex.toInt()) ?: ImageFormat.JPG
 
@@ -58,27 +57,29 @@ class FlutterVideoThumbnailPlugin : FlutterPlugin, VideoThumbnailApi {
     }
 
     override fun getThumbnailData(msg: GetThumbnailDataMessage) {
-        mainScope.launch {
-            val videoPath = msg.videoPath
-            val format = ImageFormat.ofRaw(msg.formatIndex.toInt()) ?: ImageFormat.JPG
+        isDisposed = false
+        val videoPath = msg.videoPath
+        val format = ImageFormat.ofRaw(msg.formatIndex.toInt()) ?: ImageFormat.JPG
 
-            videoThumbnailUtil.setDataSource(videoPath, HashMap(msg.headers))
+        videoThumbnailUtil.setDataSource(videoPath, HashMap(msg.headers))
 
-            videoThumbnailUtil.getMultiThumbnailData(
-                msg.videoDurationMs,
-                msg.width.toInt(),
-                msg.height.toInt(),
-                msg.quality.toInt(),
-                msg.quantity.toInt(),
-                format,
-            ) { byteArray ->
-                val event: HashMap<String, Any?> = HashMap()
-                event["event"] = "thumbnailDataResponse"
-                event["value"] = byteArray
-                event["receiveId"] = msg.receiveId
 
-                flutterState?.eventSink?.success(event)
-            }
+        videoThumbnailUtil.getMultiThumbnailData(
+            msg.videoDurationMs,
+            msg.width.toInt(),
+            msg.height.toInt(),
+            msg.quality.toInt(),
+            msg.quantity.toInt(),
+            format
+        ) { byteArray ->
+            if (isDisposed) return@getMultiThumbnailData
+
+            val event: HashMap<String, Any?> = HashMap()
+            event["event"] = "thumbnailDataResponse"
+            event["value"] = byteArray
+            event["receiveId"] = msg.receiveId
+
+            flutterState?.eventSink?.success(event)
         }
     }
 
